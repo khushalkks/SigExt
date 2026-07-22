@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+venv/
+env/
+ENV/
+.env
+
+# PyTorch Lightning and model checkpoints
+lightning_logs/
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.h5
+
+# SigExt specific large experimental logs and checkpoints
+experiments/**/lightning_logs/
+experiments/**/*.ckpt
+experiments/**/*.pt
+experiments/**/*.pth
+
+# IDEs and local settings
+.vscode/
+.idea/
+.DS_Store

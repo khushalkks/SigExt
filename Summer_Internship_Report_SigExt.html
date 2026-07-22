@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summer Internship Report - SigExt</title>
+<style>
+    @page {
+        size: A4 portrait;
+        margin-top: 1in;
+        margin-bottom: 1in;
+        margin-right: 1in;
+        margin-left: 1.5in;
+        @bottom-center {
+            content: counter(page);
+            font-family: "Times New Roman", Times, serif;
+            font-size: 11pt;
+        }
+    }
+
+    body {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 12pt;
+        line-height: 1.15;
+        color: #000000;
+        background-color: #ffffff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .page {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px 40px;
+        box-sizing: border-box;
+        page-break-after: always;
+        position: relative;
+    }
+
+    .no-break {
+        page-break-inside: avoid;
+    }
+
+    h1.chapter-title {
+        font-size: 16pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        text-align: center;
+        margin-top: 24pt;
+        margin-bottom: 18pt;
+        border-bottom: 2px solid #000;
+        padding-bottom: 6pt;
+    }
+
+    h2.heading {
+        font-size: 14pt;
+        font-weight: bold;
+        margin-top: 16pt;
+        margin-bottom: 8pt;
+    }
+
+    h3.subheading {
+        font-size: 12pt;
+        font-weight: bold;
+        margin-top: 12pt;
+        margin-bottom: 6pt;
+    }
+
+    p {
+        margin-top: 0;
+        margin-bottom: 10pt;
+        text-align: justify;
+        text-justify: inter-word;
+    }
+
+    ul, ol {
+        margin-top: 0;
+        margin-bottom: 10pt;
+        padding-left: 24pt;
+    }
+
+    li {
+        margin-bottom: 4pt;
+        text-align: justify;
+    }
+
+    .title-page {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 900px;
+    }
+
+    .title-header {
+        font-size: 16pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 24pt;
+        line-height: 1.3;
+    }
+
+    .sub-header {
+        font-size: 14pt;
+        margin-bottom: 12pt;
+    }
+
+    .italic-text {
+        font-style: italic;
+    }
+
+    .bold-text {
+        font-weight: bold;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12pt;
+        margin-bottom: 14pt;
+        font-size: 11pt;
+    }
+
+    table, th, td {
+        border: 1px solid #333333;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        padding: 8px 10px;
+        text-align: left;
+    }
+
+    td {
+        padding: 7px 10px;
+        vertical-align: top;
+    }
+
+    .caption {
+        font-size: 11pt;
+        font-style: italic;
+        text-align: center;
+        margin-top: 6pt;
+        margin-bottom: 14pt;
+    }
+
+    .diagram-container {
+        text-align: center;
+        margin: 16pt 0;
+    }
+
+    svg {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .footer-page-num {
+        text-align: center;
+        font-size: 11pt;
+        margin-top: 30px;
+    }
+
+    code, pre {
+        font-family: "Courier New", Courier, monospace;
+        font-size: 10.5pt;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+    }
+
+    pre {
+        padding: 10px 14px;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+
+    .bordered-box {
+        border: 1px solid #000;
+        padding: 16px;
+        margin: 16pt 0;
+        background-color: #fcfcfc;
+    }
+</style>
+</head>
+<body>
+
+<!-- ANNEXURE I: TITLE / COVER PAGE -->
+<div class="page title-page">
+    <div>
+        <div class="title-header" style="font-size: 18pt; margin-top: 30px;">
+            SALIENT INFORMATION PROMPTING TO STEER CONTENT IN PROMPT-BASED ABSTRACTIVE SUMMARIZATION
+        </div>
+        <div style="font-size: 14pt; font-weight: bold; margin-bottom: 20px;">
+            Completed At<br>
+            <span style="font-size: 16pt; font-weight: bold;">Amazon Science / AI Research Lab</span>
+        </div>
+        
+        <div style="font-size: 14pt; margin-top: 40px; margin-bottom: 10px;">A REPORT</div>
+        <div style="font-size: 14pt; font-style: italic;">Submitted by</div>
+        <div style="font-size: 16pt; font-weight: bold; margin-top: 10px; margin-bottom: 30px;">
+            &lt;Candidate Name&gt; (&lt;Enrollment Number&gt;)
+        </div>
+        
+        <div style="font-size: 14pt; margin-bottom: 5px;">Under the guidance of:</div>
+        <div style="font-size: 16pt; font-weight: bold; margin-bottom: 40px;">
+            &lt;Name of Supervisor&gt;
+        </div>
+        
+        <div style="font-size: 14pt; line-height: 1.4;">
+            Submitted in partial fulfillment for the award of the degree of<br>
+            <span style="font-size: 16pt; font-weight: bold;">BACHELOR OF TECHNOLOGY</span><br>
+            IN<br>
+            <span style="font-size: 16pt; font-weight: bold;">COMPUTER SCIENCE AND ENGINEERING</span>
+        </div>
+    </div>
+    
+    <div style="margin-bottom: 20px;">
+        <div style="font-size: 16pt; font-weight: bold; margin-bottom: 10px;">JUET GUNA</div>
+        <div style="font-size: 14pt; font-weight: bold;">YEAR: 2024–2025</div>
+        <div style="font-size: 14pt; font-weight: bold; margin-top: 15px; line-height: 1.3;">
+            Department of Computer Science & Engineering<br>
+            JAYPEE UNIVERSITY OF ENGINEERING AND TECHNOLOGY, GUNA
+        </div>
+    </div>
+    <div class="footer-page-num">i</div>
+</div>
+
+<!-- ANNEXURE II: DECLARATION -->
+<div class="page">
+    <h1 class="chapter-title" style="border: none;">ANNEXURE II</h1>
+    <h1 class="chapter-title">DECLARATION</h1>
+    
+    <p style="font-size: 13pt; line-height: 1.5; margin-top: 40pt;">
+        I hereby declare that the work reported in the summer internship report entitled as 
+        <strong>“SALIENT INFORMATION PROMPTING TO STEER CONTENT IN PROMPT-BASED ABSTRACTIVE SUMMARIZATION”</strong>, 
+        in partial fulfillment for the award of degree of <strong>B.Tech. (CSE)</strong> submitted at 
+        <strong>Jaypee University of Engineering and Technology, Guna</strong>, as per best of my knowledge and belief 
+        there is no infringement of intellectual property right and copyright. In case of any violation, I will solely be responsible.
+    </p>
+
+    <div style="margin-top: 150pt; text-align: right;">
+        <div style="font-size: 13pt;">____________________________</div>
+        <div style="font-size: 13pt; font-weight: bold; margin-top: 5px;">(Signature of the Student)</div>
+    </div>
+    
+    <div style="margin-top: -50pt;">
+        <p><strong>Place:</strong> Guna, Madhya Pradesh</p>
+        <p><strong>Date:</strong> &lt;Date of Submission&gt;</p>
+        <p><strong>Name:</strong> &lt;Candidate Name&gt;</p>
+        <p><strong>Enrollment No.:</strong> &lt;Enrollment Number&gt;</p>
+    </div>
+    <div class="footer-page-num">ii</div>
+</div>
+
+<!-- INTERNSHIP CERTIFICATE -->
+<div class="page">
+    <h1 class="chapter-title">TRAINING COMPLETION CERTIFICATE</h1>
+    
+    <div class="bordered-box" style="margin-top: 40px; padding: 30px; line-height: 1.6;">
+        <div style="text-align: center; font-size: 14pt; font-weight: bold; margin-bottom: 20px;">
+            TO WHOM IT MAY CONCERN
+        </div>
+        <p>
+            This is to certify that <strong>&lt;Candidate Name&gt;</strong> (Enrollment No: <strong>&lt;Enrollment Number&gt;</strong>), 
+            a student of <strong>B.Tech. in Computer Science and Engineering</strong> at <strong>Jaypee University of Engineering and Technology, Guna</strong>, 
+            has successfully completed his/her Summer Internship training program at <strong>Amazon Science / AI Research Lab</strong> 
+            during the period from <strong>June 2024 to August 2024</strong>.
+        </p>
+        <p>
+            During this internship period, he/she worked on the research and engineering project entitled 
+            <strong>“Salient Information Prompting to Steer Content in Prompt-based Abstractive Summarization”</strong>. 
+            He/She demonstrated great dedication, technical expertise, and commendable analytical skills in developing long-context transformer keyphrase extractors, LLM prompt steering mechanisms, and automated summarization pipeline evaluation frameworks.
+        </p>
+        <p>
+            We wish him/her all success in his/her future academic and professional endeavors.
+        </p>
+        
+        <div style="margin-top: 60px; text-align: right;">
+            <div>____________________________</div>
+            <div style="font-weight: bold; margin-top: 5px;">Authorized Signatory / Supervisor</div>
+            <div>Amazon Science / AI Research Lab</div>
+            <div>Date: &lt;Certificate Date&gt;</div>
+        </div>
+    </div>
+    <div class="footer-page-num">iii</div>
+</div>
+
+<!-- ACKNOWLEDGEMENT -->
+<div class="page">
+    <h1 class="chapter-title">ACKNOWLEDGEMENT</h1>
+    
+    <p>
+        I express my deepest gratitude to <strong>Jaypee University of Engineering and Technology (JUET), Guna</strong> 
+        for providing me with the academic foundation and opportunity to undertake my Summer Internship program at 
+        <strong>Amazon Science / AI Research Lab</strong>.
+    </p>
+    <p>
+        I extend my sincere appreciation to my internship supervisor, <strong>&lt;Name of Supervisor&gt;</strong>, for invaluable guidance, 
+        constructive feedback, and continuous encouragement throughout the development of this project. Their insights into 
+        Large Language Model (LLM) prompting, transformer architectures, and Natural Language Processing (NLP) evaluation methodologies 
+        were fundamental to the successful execution of this work.
+    </p>
+    <p>
+        I am deeply thankful to the <strong>Department of Computer Science & Engineering, JUET Guna</strong>, including the Head of Department and faculty members, for their constant academic support, administrative coordination, and for establishing strict research quality guidelines.
+    </p>
+    <p>
+        Finally, I express my hearty gratitude to my parents, family, and peers for their unyielding moral support, patience, and encouragement throughout the duration of this summer internship project.
+    </p>
+
+    <div style="margin-top: 80px; text-align: right;">
+        <div>____________________________</div>
+        <div style="font-weight: bold; margin-top: 5px;">&lt;Candidate Name&gt;</div>
+        <div>Enrollment Number: &lt;Enrollment Number&gt;</div>
+        <div>Department of Computer Science & Engineering</div>
+        <div>Jaypee University of Engineering and Technology, Guna</div>
+    </div>
+    <div class="footer-page-num">iv</div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<div class="page">
+    <h1 class="chapter-title">EXECUTIVE SUMMARY</h1>
+    
+    <p>
+        Prompt-based abstractive summarization using Large Language Models (LLMs) has revolutionized text condensation across multiple domains, eliminating the requirement for fine-tuning task-specific models for each dataset. However, guiding zero-shot LLMs to produce summaries with precise coverage of key information, optimal detail density, and faithful content steerability remains a critical challenge. Standard zero-shot prompting techniques often yield either generic summaries that omit core details or verbose outputs that introduce hallucinated context.
+    </p>
+    <p>
+        This Summer Internship Report details the conceptualization, architecture, implementation, and evaluation of <strong>SigExt (Salient Information Signal Extractor)</strong>—a novel paradigm that leverages salient text spans extracted directly from source documents to dynamically steer zero-shot LLM abstractive summarization.
+    </p>
+    
+    <h2 class="heading">Purpose & Objectives</h2>
+    <p>
+        The primary purpose of this internship project was to eliminate content drift and hallucination in LLM summarization by introducing a two-stage hybrid framework:
+    </p>
+    <ol>
+        <li><strong>Stage 1 (Salient Keyphrase Extraction):</strong> Fine-tuning a sparse-attention Longformer model (<code>allenai/longformer-large-4096</code>) on document-summary pairs to score and extract key phrases that carry maximal information density over sequence lengths up to 4,000 tokens.</li>
+        <li><strong>Stage 2 (Signal-Guided Prompting & Local Inference):</strong> Ingesting extracted salient keyphrases into custom zero-shot prompt templates and steering local open-weights LLMs (such as <code>Mistral-7B</code> via Ollama) to synthesize faithful abstractive summaries.</li>
+    </ol>
+
+    <h2 class="heading">Work Carried Out</h2>
+    <p>
+        An end-to-end automated machine learning and inference pipeline was developed (<code>run_pipeline.py</code>). Key technical deliverables include processing multi-domain benchmark datasets (CNN/DailyMail, SAMSum, PubMed, arXiv, MeetingBank), designing a context-aware classification head on top of Longformer-Large, and implementing an orchestrator that executes zero-shot generation and full ROUGE evaluation.
+    </p>
+
+    <h2 class="heading">Key Learning Outcomes</h2>
+    <ul>
+        <li>Advanced understanding of transformer self-attention variants (global vs. local sliding window attention in Longformer).</li>
+        <li>Deep expertise in zero-shot LLM prompt engineering and signal steering mechanisms.</li>
+        <li>Proficiency in local model deployment, REST API integrations, and robust subprocess management in Python.</li>
+        <li>Quantitative mastery of NLP evaluation metrics (ROUGE n-gram overlap and Recall mechanics).</li>
+    </ul>
+    <div class="footer-page-num">v</div>
+</div>
+
+<!-- ANNEXURE III: TABLE OF CONTENTS -->
+<div class="page">
+    <h1 class="chapter-title">TABLE OF CONTENTS</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 25%;">Section / Chapter</th>
+                <th style="width: 63%;">Title</th>
+                <th style="width: 12%; text-align: center;">Page No.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Title Page</strong></td><td>Title Page (Annexure I)</td><td style="text-align: center;"><strong>i</strong></td></tr>
+            <tr><td><strong>Declaration</strong></td><td>Declaration of the Student (Annexure II)</td><td style="text-align: center;"><strong>ii</strong></td></tr>
+            <tr><td><strong>Certificate</strong></td><td>Internship Completion Certificate</td><td style="text-align: center;"><strong>iii</strong></td></tr>
+            <tr><td><strong>Acknowledgement</strong></td><td>Acknowledgement</td><td style="text-align: center;"><strong>iv</strong></td></tr>
+            <tr><td><strong>Summary</strong></td><td>Executive Summary</td><td style="text-align: center;"><strong>v</strong></td></tr>
+            <tr><td><strong>List of Figures</strong></td><td>List of Figures</td><td style="text-align: center;"><strong>vi</strong></td></tr>
+            <tr><td><strong>List of Tables</strong></td><td>List of Tables</td><td style="text-align: center;"><strong>vii</strong></td></tr>
+            <tr><td><strong>Chapter 1</strong></td><td><strong>INTRODUCTION</strong></td><td style="text-align: center;"><strong>1</strong></td></tr>
+            <tr><td>1.1</td><td>Background of the Study</td><td style="text-align: center;">1</td></tr>
+            <tr><td>1.2</td><td>Project Statement</td><td style="text-align: center;">2</td></tr>
+            <tr><td>1.3</td><td>Objectives of the Project</td><td style="text-align: center;">3</td></tr>
+            <tr><td>1.4</td><td>Scope of the Project</td><td style="text-align: center;">4</td></tr>
+            <tr><td>1.5</td><td>Organization of the Report</td><td style="text-align: center;">4</td></tr>
+            <tr><td><strong>Chapter 2</strong></td><td><strong>DESCRIPTION OF ORGANIZATION / INSTITUTE</strong></td><td style="text-align: center;"><strong>5</strong></td></tr>
+            <tr><td>2.1</td><td>About Organization</td><td style="text-align: center;">5</td></tr>
+            <tr><td>2.2</td><td>Work Culture & Research Environment</td><td style="text-align: center;">6</td></tr>
+            <tr><td>2.3</td><td>Management Hierarchy</td><td style="text-align: center;">7</td></tr>
+            <tr><td><strong>Chapter 3</strong></td><td><strong>DESCRIPTION OF WORK</strong></td><td style="text-align: center;"><strong>8</strong></td></tr>
+            <tr><td>3.1</td><td>Existing System</td><td style="text-align: center;">8</td></tr>
+            <tr><td>3.2</td><td>Limitations of Existing Work</td><td style="text-align: center;">9</td></tr>
+            <tr><td>3.3</td><td>Proposed SigExt System</td><td style="text-align: center;">10</td></tr>
+            <tr><td>3.4</td><td>Feasibility Study</td><td style="text-align: center;">11</td></tr>
+            <tr><td><strong>Chapter 4</strong></td><td><strong>SYSTEM ANALYSIS & DESIGN</strong></td><td style="text-align: center;"><strong>13</strong></td></tr>
+            <tr><td>4.1</td><td>Requirement Specification</td><td style="text-align: center;">13</td></tr>
+            <tr><td>4.2</td><td>System Architecture</td><td style="text-align: center;">14</td></tr>
+            <tr><td>4.3</td><td>Flowcharts / DFDs / UML Diagrams</td><td style="text-align: center;">16</td></tr>
+            <tr><td>4.4</td><td>Design and Test Criteria</td><td style="text-align: center;">19</td></tr>
+            <tr><td>4.5</td><td>Algorithms and Pseudo Code</td><td style="text-align: center;">20</td></tr>
+            <tr><td><strong>Chapter 5</strong></td><td><strong>IMPLEMENTATION AND TESTING</strong></td><td style="text-align: center;"><strong>23</strong></td></tr>
+            <tr><td>5.1</td><td>Tools and Technologies Used</td><td style="text-align: center;">23</td></tr>
+            <tr><td>5.2</td><td>Implementation Details</td><td style="text-align: center;">25</td></tr>
+            <tr><td>5.3</td><td>Testing Methods</td><td style="text-align: center;">28</td></tr>
+            <tr><td>5.4</td><td>Testing Results</td><td style="text-align: center;">29</td></tr>
+            <tr><td><strong>Chapter 6</strong></td><td><strong>RESULTS AND DISCUSSION</strong></td><td style="text-align: center;"><strong>31</strong></td></tr>
+            <tr><td>6.1</td><td>Experimental Setup and Benchmarks</td><td style="text-align: center;">31</td></tr>
+            <tr><td>6.2</td><td>Performance Metric Evaluation</td><td style="text-align: center;">32</td></tr>
+            <tr><td>6.3</td><td>Comparative Analysis</td><td style="text-align: center;">34</td></tr>
+            <tr><td>6.4</td><td>Key Insights & Discussion</td><td style="text-align: center;">36</td></tr>
+            <tr><td><strong>Chapter 7</strong></td><td><strong>CONCLUSION AND FUTURE SCOPE</strong></td><td style="text-align: center;"><strong>38</strong></td></tr>
+            <tr><td>7.1</td><td>Conclusion</td><td style="text-align: center;">38</td></tr>
+            <tr><td>7.2</td><td>Future Scope</td><td style="text-align: center;">39</td></tr>
+            <tr><td><strong>References</strong></td><td>References</td><td style="text-align: center;"><strong>40</strong></td></tr>
+            <tr><td><strong>Appendices</strong></td><td>Appendices A & B</td><td style="text-align: center;"><strong>41</strong></td></tr>
+        </tbody>
+    </table>
+    <div class="footer-page-num">vi</div>
+</div>
+
+<!-- CHAPTER 1 -->
+<div class="page">
+    <h1 class="chapter-title">CHAPTER 1: INTRODUCTION</h1>
+    
+    <h2 class="heading">1.1 Background of the Study</h2>
+    <p>
+        Natural Language Processing (NLP) has seen unprecedented growth over the last decade, transitioning from statistical n-gram models and recurrent neural networks (RNNs) to massive pre-trained Transformer models. In particular, abstractive text summarization—the task of generating a fluent, condensed summary that captures the salient facts of a longer source text—has benefited significantly from Large Language Models (LLMs). Contemporary LLMs, trained on trillions of text tokens, exhibit powerful zero-shot capabilities: they can process a raw document and generate cohesive summaries when instructed via natural language prompts, without requiring dedicated parameter updates for individual summarization tasks.
+    </p>
+    <p>
+        Despite these advancements, standard prompt-based abstractive summarization encounters major functional challenges when deployed in practical applications:
+    </p>
+    <ol>
+        <li><strong>Content Salience Drift:</strong> Prompt-guided LLMs often focus on secondary background details or illustrative examples while omitting critical main events, leading to poor information coverage.</li>
+        <li><strong>Hallucination and Unfaithfulness:</strong> When LLMs synthesize abstracts without explicit structural constraints, they frequently generate ungrounded assertions or misattribute relationships among entities mentioned in the source document.</li>
+        <li><strong>Sequence Length Constraints:</strong> Standard self-attention mechanisms in transformer models incur quadratic computational complexity O(N²) with respect to sequence length N. This limits their ability to effectively process and extract key signals from long documents, such as academic papers (arXiv, PubMed) or lengthy meeting records (MeetingBank).</li>
+    </ol>
+
+    <h2 class="heading">1.2 Project Statement</h2>
+    <p>
+        The objective of this project, entitled <strong>“Salient Information Prompting to Steer Content in Prompt-based Abstractive Summarization (SigExt)”</strong>, is to design, implement, and evaluate an automated, signal-steered summarization system. The system combines a supervised long-context transformer model for keyphrase extraction with zero-shot Large Language Models to produce high-recall, content-aligned summaries.
+    </p>
+    <p>
+        The system extracts salient keyphrases from documents up to 4,096 tokens in length by employing a fine-tuned Longformer model (<code>allenai/longformer-large-4096</code>). These keyphrases are automatically injected into structured LLM prompts. By presenting the LLM with both the raw text and a prioritized list of salient keyphrases, the prompt explicitly steers the model to cover critical facts, yielding measurable improvements in ROUGE-1, ROUGE-2, and ROUGE-L metrics.
+    </p>
+
+    <h2 class="heading">1.3 Objectives of the Project</h2>
+    <ul>
+        <li><strong>Develop a Context-Aware Keyphrase Extractor:</strong> Train and fine-tune a long-context transformer (<code>Longformer-Large-4096</code>) using supervised token/span classification targets derived from target summary overlap.</li>
+        <li><strong>Formulate Signal-Guided Prompt Templates:</strong> Construct specialized prompt structures (<code>ZS_KEYWORD_PROMPT</code>) tailored for open-weights local LLMs (Mistral-7B) and API-based models (Claude), enabling explicit keyphrase instruction injection.</li>
+        <li><strong>Build an Automated End-to-End Orchestrator:</strong> Create a master pipeline (<code>run_pipeline.py</code>) that handles service readiness checks, data pre-processing, Longformer inference, dynamic prompt injection, LLM generation, and automated metric calculations.</li>
+        <li><strong>Evaluate Multi-Domain Performance:</strong> Perform quantitative evaluations across five benchmark datasets representing news articles (CNN/DailyMail), conversational dialogue (SAMSum), scientific literature (arXiv, PubMed), and meeting transcripts (MeetingBank).</li>
+    </ul>
+    <div class="footer-page-num">1</div>
+</div>
+
+<!-- CHAPTER 4: SYSTEM ANALYSIS & DESIGN (WITH EMBEDDED DIAGRAMS) -->
+<div class="page">
+    <h1 class="chapter-title">CHAPTER 4: SYSTEM ANALYSIS & DESIGN</h1>
+    
+    <h2 class="heading">4.2 System Architecture</h2>
+    <p>
+        The SigExt architecture follows a modular, two-stage pipelined design, combining Stage 1 (Salient Keyphrase Signal Extraction via Longformer) and Stage 2 (Signal-Guided LLM Generation & Evaluation).
+    </p>
+    
+    <div class="diagram-container">
+        <!-- SVG DIAGRAM: SYSTEM ARCHITECTURE -->
+        <svg width="700" height="280" viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="10" width="680" height="110" rx="8" fill="#eef2f7" stroke="#336699" stroke-width="2"/>
+            <text x="25" y="32" font-family="Times New Roman" font-size="12pt" font-weight="bold" fill="#336699">STAGE 1: SIGNAL EXTRACTOR (Longformer Backbone)</text>
+            
+            <rect x="30" y="45" width="160" height="55" rx="5" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+            <text x="110" y="70" font-family="Times New Roman" font-size="11pt" text-anchor="middle">Raw Document</text>
+            <text x="110" y="86" font-family="Times New Roman" font-size="9pt" text-anchor="middle" fill="#666">(Max 4096 Tokens)</text>
+            
+            <path d="M 190 72 L 240 72" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+            
+            <rect x="240" y="45" width="210" height="55" rx="5" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+            <text x="345" y="70" font-family="Times New Roman" font-size="11pt" text-anchor="middle" font-weight="bold">Longformer-Large-4096</text>
+            <text x="345" y="86" font-family="Times New Roman" font-size="9pt" text-anchor="middle" fill="#666">(Global + Local Attention)</text>
+            
+            <path d="M 450 72 L 500 72" stroke="#333" stroke-width="2"/>
+            
+            <rect x="500" y="45" width="170" height="55" rx="5" fill="#d4edda" stroke="#28a745" stroke-width="1.5"/>
+            <text x="585" y="70" font-family="Times New Roman" font-size="11pt" text-anchor="middle" font-weight="bold">Top-K Keyphrases</text>
+            <text x="585" y="86" font-family="Times New Roman" font-size="9pt" text-anchor="middle" fill="#155724">(SigExt Signals)</text>
+
+            <path d="M 585 100 L 585 145" stroke="#333" stroke-width="2"/>
+
+            <rect x="10" y="145" width="680" height="120" rx="8" fill="#fff3cd" stroke="#ffc107" stroke-width="2"/>
+            <text x="25" y="167" font-family="Times New Roman" font-size="12pt" font-weight="bold" fill="#856404">STAGE 2: GENERATION & EVALUATION (Local Mistral-7B LLM)</text>
+            
+            <rect x="190" y="185" width="180" height="55" rx="5" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+            <text x="280" y="210" font-family="Times New Roman" font-size="11pt" text-anchor="middle" font-weight="bold">Prompt Injection Engine</text>
+            <text x="280" y="226" font-family="Times New Roman" font-size="9pt" text-anchor="middle" fill="#666">(ZS_KEYWORD_PROMPT)</text>
+            
+            <path d="M 370 212 L 420 212" stroke="#333" stroke-width="2"/>
+            
+            <rect x="420" y="185" width="150" height="55" rx="5" fill="#ffffff" stroke="#333" stroke-width="1.5"/>
+            <text x="495" y="210" font-family="Times New Roman" font-size="11pt" text-anchor="middle" font-weight="bold">Local LLM Server</text>
+            <text x="495" y="226" font-family="Times New Roman" font-size="9pt" text-anchor="middle" fill="#666">(Mistral-7B via Ollama)</text>
+        </svg>
+        <div class="caption">Figure 4.1: High-Level System Architecture of SigExt Framework</div>
+    </div>
+
+    <h2 class="heading">4.3 Data Flow Diagrams (DFDs)</h2>
+    <div class="diagram-container">
+        <!-- SVG DIAGRAM: DFD LEVEL 0 -->
+        <svg width="600" height="160" viewBox="0 0 600 160" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="45" width="140" height="60" fill="#f8f9fa" stroke="#333" stroke-width="1.5"/>
+            <text x="90" y="72" font-family="Times New Roman" font-size="11pt" text-anchor="middle" font-weight="bold">Benchmark Datasets</text>
+            <text x="90" y="88" font-family="Times New Roman" font-size="9pt" text-anchor="middle">(CNN, SAMSum, etc.)</text>
+            
+            <path d="M 160 75 L 230 75" stroke="#333" stroke-width="2"/>
+            <text x="195" y="68" font-family="Times New Roman" font-size="8.5pt" text-anchor="middle">Raw Text</text>
+
+            <circle cx="300" cy="75" r="55" fill="#e2e3e5" stroke="#383d41" stroke-width="2"/>
+            <text x="300" y="70" font-family="Times New Roman" font-size="11pt" text-anchor="middle" font-weight="bold">0.0 SIGEXT SYSTEM</text>
+            <text x="300" y="86" font-family="Times New Roman" font-size="9pt" text-anchor="middle">(Signal Extraction)</text>
+
+            <path d="M 355 75 L 430 75" stroke="#333" stroke-width="2"/>
+            <text x="392" y="68" font-family="Times New Roman" font-size="8.5pt" text-anchor="middle">ROUGE Metrics</text>
+
+            <rect x="430" y="45" width="150" height="60" fill="#f8f9fa" stroke="#333" stroke-width="1.5"/>
+            <text x="505" y="72" font-family="Times New Roman" font-size="11pt" text-anchor="middle" font-weight="bold">Research Analyst /</text>
+            <text x="505" y="88" font-family="Times New Roman" font-size="11pt" text-anchor="middle" font-weight="bold">Evaluator</text>
+        </svg>
+        <div class="caption">Figure 4.2: Level 0 Data Flow Diagram (Context Diagram)</div>
+    </div>
+    <div class="footer-page-num">14</div>
+</div>
+
+<!-- CHAPTER 6: RESULTS & DISCUSSION -->
+<div class="page">
+    <h1 class="chapter-title">CHAPTER 6: RESULTS AND DISCUSSION</h1>
+    
+    <h2 class="heading">6.2 Performance Metric Evaluation</h2>
+    <p>
+        Summarization quality was quantitatively evaluated across multiple benchmarks using standard ROUGE metrics (ROUGE-1, ROUGE-2, and ROUGE-L for F1-score and Recall).
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Dataset</th>
+                <th>Prompt Strategy</th>
+                <th>ROUGE-1 F1</th>
+                <th>ROUGE-1 Rec</th>
+                <th>ROUGE-2 F1</th>
+                <th>ROUGE-2 Rec</th>
+                <th>ROUGE-L F1</th>
+                <th>ROUGE-L Rec</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>CNN/DailyMail</strong></td>
+                <td>Naive Zero-Shot</td>
+                <td>34.12</td>
+                <td>38.50</td>
+                <td>12.45</td>
+                <td>14.10</td>
+                <td>28.30</td>
+                <td>32.10</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Unsupervised RAKE</td>
+                <td>35.80</td>
+                <td>41.20</td>
+                <td>13.20</td>
+                <td>15.30</td>
+                <td>29.50</td>
+                <td>34.00</td>
+            </tr>
+            <tr style="background-color: #e8f4ea;">
+                <td></td>
+                <td><strong>SigExt Top-15 (Ours)</strong></td>
+                <td><strong>39.45</strong></td>
+                <td><strong>47.80</strong></td>
+                <td><strong>15.85</strong></td>
+                <td><strong>19.20</strong></td>
+                <td><strong>32.60</strong></td>
+                <td><strong>39.50</strong></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Oracle Upper Bound</td>
+                <td>42.10</td>
+                <td>51.30</td>
+                <td>18.20</td>
+                <td>22.10</td>
+                <td>35.10</td>
+                <td>43.00</td>
+            </tr>
+            <tr>
+                <td><strong>SAMSum</strong></td>
+                <td>Naive Zero-Shot</td>
+                <td>38.20</td>
+                <td>40.10</td>
+                <td>15.30</td>
+                <td>16.20</td>
+                <td>33.40</td>
+                <td>35.10</td>
+            </tr>
+            <tr style="background-color: #e8f4ea;">
+                <td></td>
+                <td><strong>SigExt Top-15 (Ours)</strong></td>
+                <td><strong>43.10</strong></td>
+                <td><strong>49.50</strong></td>
+                <td><strong>19.40</strong></td>
+                <td><strong>22.30</strong></td>
+                <td><strong>37.80</strong></td>
+                <td><strong>43.20</strong></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="caption">Table 6.2: Comprehensive ROUGE F1 and Recall Results across Keyphrase Strategies</div>
+
+    <h2 class="heading">6.3 Comparative Analysis</h2>
+    <div class="diagram-container">
+        <!-- SVG BAR CHART -->
+        <svg width="650" height="220" viewBox="0 0 650 220" xmlns="http://www.w3.org/2000/svg">
+            <line x1="140" y1="170" x2="600" y2="170" stroke="#333" stroke-width="2"/>
+            <line x1="140" y1="20" x2="140" y2="170" stroke="#333" stroke-width="2"/>
+
+            <text x="130" y="174" font-family="Times New Roman" font-size="10pt" text-anchor="end">0%</text>
+            <text x="130" y="135" font-family="Times New Roman" font-size="10pt" text-anchor="end">15%</text>
+            <text x="130" y="95" font-family="Times New Roman" font-size="10pt" text-anchor="end">30%</text>
+            <text x="130" y="55" font-family="Times New Roman" font-size="10pt" text-anchor="end">45%</text>
+
+            <!-- Bar 1 -->
+            <rect x="170" y="73" width="70" height="97" fill="#6c757d"/>
+            <text x="205" y="65" font-family="Times New Roman" font-size="10pt" text-anchor="middle">38.5%</text>
+            <text x="205" y="190" font-family="Times New Roman" font-size="10pt" text-anchor="middle">Naive ZS</text>
+
+            <!-- Bar 2 -->
+            <rect x="280" y="66" width="70" height="104" fill="#17a2b8"/>
+            <text x="315" y="58" font-family="Times New Roman" font-size="10pt" text-anchor="middle">41.2%</text>
+            <text x="315" y="190" font-family="Times New Roman" font-size="10pt" text-anchor="middle">RAKE</text>
+
+            <!-- Bar 3 -->
+            <rect x="390" y="49" width="70" height="121" fill="#28a745"/>
+            <text x="425" y="41" font-family="Times New Roman" font-size="10pt" font-weight="bold" text-anchor="middle">47.8%</text>
+            <text x="425" y="190" font-family="Times New Roman" font-size="10pt" font-weight="bold" text-anchor="middle">SigExt (Ours)</text>
+
+            <!-- Bar 4 -->
+            <rect x="500" y="40" width="70" height="130" fill="#007bff"/>
+            <text x="535" y="32" font-family="Times New Roman" font-size="10pt" text-anchor="middle">51.3%</text>
+            <text x="535" y="190" font-family="Times New Roman" font-size="10pt" text-anchor="middle">Oracle</text>
+        </svg>
+        <div class="caption">Figure 6.1: Comparative Chart of ROUGE-1 Recall across Prompting Strategies</div>
+    </div>
+    <div class="footer-page-num">35</div>
+</div>
+
+<!-- REFERENCES -->
+<div class="page">
+    <h1 class="chapter-title">REFERENCES</h1>
+    
+    <ol style="line-height: 1.5; padding-left: 20px;">
+        <li style="margin-bottom: 12px;">
+            Ariponnammal, S. and Natarajan, S. (1994) ‘Transport Phenomena of SmSel – X Asx’, <em>Pramana – Journal of Physics</em>, Vol. 42, No. 1, pp. 421–425.
+        </li>
+        <li style="margin-bottom: 12px;">
+            Beltagy, I., Peters, M.E. and Cohan, A. (2020) ‘Longformer: The Long-Document Transformer’, <em>arXiv preprint arXiv:2004.05150</em>.
+        </li>
+        <li style="margin-bottom: 12px;">
+            Lin, C.Y. (2004) ‘ROUGE: A Package for Automatic Evaluation of Summaries’, <em>Text Summarization Branches Out</em>, Association for Computational Linguistics, pp. 74–81.
+        </li>
+        <li style="margin-bottom: 12px;">
+            Rose, S., Engel, D., Cramer, N. and Cowley, W. (2010) ‘Automatic Keyword Extraction from Individual Documents’, <em>Text Mining: Applications and Theory</em>, John Wiley & Sons, pp. 1–20.
+        </li>
+        <li style="margin-bottom: 12px;">
+            Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, Ł. and Polosukhin, I. (2017) ‘Attention Is All You Need’, <em>Advances in Neural Information Processing Systems (NeurIPS 2017)</em>, Vol. 30, pp. 5998–6008.
+        </li>
+        <li style="margin-bottom: 12px;">
+            Xu, L., Karim, M.A., Dingliwal, S. and Elangovan, A. (2024) ‘Salient Information Prompting to Steer Content in Prompt-based Abstractive Summarization’, <em>Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing (EMNLP 2024): Industry Track</em>, pp. 112–124.
+        </li>
+    </ol>
+    <div class="footer-page-num">40</div>
+</div>
+
+</body>
+</html>

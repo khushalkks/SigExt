@@ -20,99 +20,75 @@ def extract_xml_tag(generation: str, tag):
 
 
 def predict_one_eg_mistral(x):
-    current_session = boto3_session.Session()
-    bedrock = current_session.client(
-        service_name="bedrock-runtime",
-        region_name="us-west-2",
-        endpoint_url="https://bedrock-runtime.us-west-2.amazonaws.com",
-        config=botocore.config.Config(
-            read_timeout=120,  # corresponds to inference time limit set for Bedrock
-            connect_timeout=120,
-            retries={
-                "max_attempts": 5,
-            },
-        ),
-    )
-    api_template = {
-        "modelId": "mistral.mistral-7b-instruct-v0:2",
-        "contentType": "application/json",
-        "accept": "*/*",
-        "body": "",
+    import requests
+    url = "http://localhost:11434/api/generate"
+    payload = {
+        "model": "mistral:latest",
+        "prompt": x["prompt_input"],
+        "stream": False,
+        "options": {
+            "temperature": 1.0,
+            "top_p": 0.8,
+            "top_k": 10,
+            "num_predict": 512
+        }
     }
-
-    body = {"max_tokens": 512, "temperature": 1.0, "top_p": 0.8, "top_k": 10, "prompt": x["prompt_input"]}
-
-    api_template["body"] = json.dumps(body)
-
+    
     success = False
     response = None
-    for i in range(10):
+    for i in range(5):
         try:
-            response = bedrock.invoke_model(**api_template)
-            success = True
-            break
-        except:
-            traceback.print_exc()
-            time.sleep(5)
+            response = requests.post(url, json=payload, timeout=120)
+            if response.status_code == 200:
+                success = True
+                break
+        except Exception as e:
+            logging.error(f"Ollama attempt {i+1} failed: {e}")
+            time.sleep(2)
 
     if success:
-        response_body = json.loads(response.get("body").read())
-        logging.info(response_body)
-        return response_body["outputs"][0]["text"]
+        response_body = response.json()
+        logging.info(response_body.get("response", ""))
+        return response_body.get("response", "")
     else:
         return ""
 
 
 def predict_one_eg_claude_instant(x):
-    current_session = boto3_session.Session()
-    bedrock = current_session.client(
-        service_name="bedrock-runtime",
-        region_name="us-west-2",
-        endpoint_url="https://bedrock-runtime.us-west-2.amazonaws.com",
-        config=botocore.config.Config(
-            read_timeout=120,  # corresponds to inference time limit set for Bedrock
-            connect_timeout=120,
-            retries={
-                "max_attempts": 5,
-            },
-        ),
+    import requests
+    url = "http://localhost:11434/api/generate"
+    prompt = "Human: {prompt}\nWrite your summary in <summary> XML tags.\n\nAssistant: ".format(
+        prompt=x["prompt_input"].strip()
     )
-    api_template = {
-        "modelId": "anthropic.claude-instant-v1",
-        "contentType": "application/json",
-        "accept": "*/*",
-        "body": "",
+    payload = {
+        "model": "mistral:latest",
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": 1.0,
+            "top_p": 0.8,
+            "top_k": 10,
+            "num_predict": 512
+        }
     }
-
-    body = {
-        "max_tokens_to_sample": 512,
-        "stop_sequences": ["\n\nHuman:"],
-        "anthropic_version": "bedrock-2023-05-31",
-        "temperature": 1.0,
-        "top_p": 0.8,
-        "top_k": 10,
-        "prompt": "Human: {prompt}\nWrite your summary in <summary> XML tags.\n\nAssistant: ".format(
-            prompt=x["prompt_input"].strip()
-        ),
-    }
-
-    api_template["body"] = json.dumps(body)
 
     success = False
     response = None
-    for i in range(10):
+    for i in range(5):
         try:
-            response = bedrock.invoke_model(**api_template)
-            success = True
-            break
-        except:
-            traceback.print_exc()
-            time.sleep(20)
+            response = requests.post(url, json=payload, timeout=120)
+            if response.status_code == 200:
+                success = True
+                break
+        except Exception as e:
+            logging.error(f"Ollama attempt {i+1} failed: {e}")
+            time.sleep(2)
 
     if success:
-        response_body = json.loads(response.get("body").read())
-        summary = extract_xml_tag(response_body["completion"], "summary")
-        logging.info(summary or response_body["completion"])
-        return summary or response_body["completion"]
+        response_body = response.json()
+        generation = response_body.get("response", "")
+        summary = extract_xml_tag(generation, "summary")
+        logging.info(summary or generation)
+        return summary or generation
     else:
         return ""

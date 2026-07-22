@@ -288,11 +288,15 @@ def main():
         auto_insert_metric_name=False,
     )
 
+    accelerator = "gpu" if torch.cuda.is_available() else "cpu"
+    strategy = "ddp_find_unused_parameters_true" if (torch.cuda.is_available() and torch.cuda.device_count() > 1) else "auto"
     trainer = pl.Trainer(
         max_epochs=10,
         callbacks=[checkpoint_callback],
         default_root_dir=args.checkpoint_dir,
-        strategy="ddp_find_unused_parameters_true",
+        accelerator=accelerator,
+        devices=1,
+        strategy=strategy,
         log_every_n_steps=1,
     )
 
