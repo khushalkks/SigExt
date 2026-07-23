@@ -4,6 +4,7 @@ import os
 import json
 import requests
 import time
+import argparse
 
 def check_ollama():
     print("Checking Ollama status...")
@@ -67,6 +68,13 @@ def run_command(command, description):
 def main():
     print("=== STARTING SIGEXT WORKING PIPELINE ===")
     
+    parser = argparse.ArgumentParser(description="Run complete SigExt pipeline.")
+    parser.add_argument("--tune_threshold", action="store_true", help="Tune threshold and top-k on validation set.")
+    parser.add_argument("--dedup_strategy", default="fuzzy", choices=["exact", "substring", "fuzzy"], help="Keyword deduplication strategy.")
+    parser.add_argument("--dedup_threshold", default=70, type=int, help="Similarity threshold for fuzzy deduplication.")
+    
+    args = parser.parse_args()
+    
     # 1. Verify Ollama is running
     if not check_ollama():
         sys.exit(1)
@@ -99,9 +107,13 @@ def main():
         "--kw_model_top_k", "15",
         "--dataset", "cnn",
         "--dataset_dir", keyphrase_output_dir,
-        "--output_dir", summary_output_dir
+        "--output_dir", summary_output_dir,
+        "--dedup_strategy", args.dedup_strategy,
+        "--dedup_threshold", str(args.dedup_threshold)
     ]
-    
+    if args.tune_threshold:
+        summarization_cmd.append("--tune_threshold")
+        
     success = run_command(summarization_cmd, "Stage 2: Zero-Shot Summarization & Evaluation")
     if not success:
         sys.exit(1)

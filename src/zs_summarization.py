@@ -62,7 +62,7 @@ class NaivePrompt(object):
         return self.prompt.replace("<text>", example["trunc_input"])
 
 
-def remove_duplicate_top_k(candidates, top_k, threshold=70):
+def remove_duplicate_top_k(candidates, top_k, strategy="fuzzy", threshold=70):
     ret = []
 
     for candidate in candidates:
@@ -72,9 +72,23 @@ def remove_duplicate_top_k(candidates, top_k, threshold=70):
         if len(ret) >= top_k:
             break
 
+        cand_lower = candidate["phrase"].lower()
+
         for added_kw in ret:
-            if fuzz.ratio(added_kw["phrase"].lower(), candidate["phrase"].lower()) >= threshold:
-                if len(added_kw["phrase"]) <= len(candidate["phrase"]):
+            added_lower = added_kw["phrase"].lower()
+            
+            if strategy == "fuzzy":
+                is_dup = fuzz.ratio(added_lower, cand_lower) >= threshold
+            elif strategy == "substring":
+                is_dup = (added_lower in cand_lower) or (cand_lower in added_lower)
+            elif strategy == "exact":
+                is_dup = added_lower == cand_lower
+            else:
+                is_dup = False
+
+            if is_dup:
+                # Keep the longer/more informative phrase
+                if len(added_lower) <= len(cand_lower):
                     to_delete.add(added_kw["phrase"])
                 else:
                     to_skip = True
@@ -94,6 +108,8 @@ class SegExtTopK(object):
         dataset_name,
         top_k,
         deduplicate=True,
+        dedup_strategy="fuzzy",
+        dedup_threshold=70,
         logits_threshold=-1,
         use_rank=False,
         customized_prompt=None,
@@ -101,6 +117,8 @@ class SegExtTopK(object):
         self.prompt = customized_prompt or ZS_KEYWORD_PROMPT_STR[model_name][dataset_name]
         self.top_k = top_k
         self.deduplicate = deduplicate
+        self.dedup_strategy = dedup_strategy
+        self.dedup_threshold = dedup_threshold
         self.logits_threshold = logits_threshold
         self.use_rank = use_rank
 
@@ -118,7 +136,12 @@ class SegExtTopK(object):
                 selected_keywords[-1]["score"] = kw_info["score"]
 
         if self.deduplicate:
-            selected_keywords = remove_duplicate_top_k(selected_keywords, top_k=self.top_k)
+            selected_keywords = remove_duplicate_top_k(
+                selected_keywords,
+                top_k=self.top_k,
+                strategy=self.dedup_strategy,
+                threshold=self.dedup_threshold
+            )
         else:
             selected_keywords = selected_keywords[: self.top_k]
 
@@ -126,13 +149,91 @@ class SegExtTopK(object):
         return self.prompt.replace("<text>", example["trunc_input"]).replace("<keywords>", formatted_keywords)
 
 
-def get_prompt_fn(model_name, dataset, kw_strategy, kw_model_top_k, logits_threshold):
+def get_prompt_fn(model_name, dataset, kw_strategy, kw_model_top_k, logits_threshold, dedup_strategy="fuzzy", dedup_threshold=70):
     if kw_strategy == "disable":
         return NaivePrompt(model_name, dataset)
     elif kw_strategy == "sigext_topk":
-        return SegExtTopK(model_name, dataset, top_k=kw_model_top_k, logits_threshold=logits_threshold)
+        return SegExtTopK(
+            model_name,
+            dataset,
+            top_k=kw_model_top_k,
+            logits_threshold=logits_threshold,
+            deduplicate=True,
+            dedup_strategy=dedup_strategy,
+            dedup_threshold=dedup_threshold
+        )
     else:
         raise RuntimeError("unknown kw strategy.")
+
+
+def tune_hyperparameters(dataset_file, deduplicate=True, dedup_strategy="fuzzy", dedup_threshold=70):
+    if not os.path.exists(dataset_file):
+        logging.warning("validation set not found for hyperparameter tuning. Defaulting to pct=75, top_k=15")
+        return 75, 15
+
+    with jsonlines.open(dataset_file) as f:
+        val_data = list(f)
+
+    if not val_data or "input_kw_model" not in val_data[0]:
+        logging.warning("input_kw_model not found in validation file. Defaulting to pct=75, top_k=15")
+        return 75, 15
+
+    # Gather all logits to compute percentiles
+    all_logits = []
+    for item in val_data:
+        for kw_info_model in item["input_kw_model"]:
+            all_logits.append(kw_info_model["score"])
+
+    if not all_logits:
+        return 75, 15
+
+    scorer = rouge_scorer.RougeScorer(["rouge1"], use_stemmer=True)
+    candidate_percentiles = [50, 60, 70, 75, 80, 85, 90]
+    candidate_top_ks = [5, 10, 15, 20, 25]
+
+    best_percentile = 75
+    best_top_k = 15
+    best_score = -1.0
+
+    logging.info("Starting hyperparameter tuning on validation split...")
+    for pct in candidate_percentiles:
+        threshold = np.percentile(all_logits, pct)
+        for top_k in candidate_top_ks:
+            scores = []
+            for example in val_data:
+                selected_keywords = []
+                for kw_info in sorted(example["input_kw_model"], key=lambda x: x["score"], reverse=True):
+                    if kw_info["score"] < threshold:
+                        break
+                    selected_keywords.append(example["trunc_input_phrases"][kw_info["kw_index"]])
+
+                if deduplicate:
+                    selected_keywords = remove_duplicate_top_k(
+                        selected_keywords,
+                        top_k=top_k,
+                        strategy=dedup_strategy,
+                        threshold=dedup_threshold
+                    )
+                else:
+                    selected_keywords = selected_keywords[:top_k]
+
+                keyword_text = " ".join([item["phrase"] for item in selected_keywords])
+                reference = example["raw_output"]
+
+                # Measure overlap with reference summary
+                rouge_result = scorer.score(target=reference, prediction=keyword_text)
+                scores.append(rouge_result["rouge1"].fmeasure)
+
+            avg_score = np.mean(scores)
+            logging.info(f"Percentile {pct} (Thresh {threshold:.4f}), Top-K {top_k} -> Keyphrase ROUGE-1 F1: {avg_score:.4f}")
+
+            if avg_score > best_score:
+                best_score = avg_score
+                best_percentile = pct
+                best_top_k = top_k
+
+    logging.info(f"Best tuned parameters: Percentile={best_percentile}, Top-K={best_top_k} (ROUGE-1 F1={best_score:.4f})")
+    return best_percentile, best_top_k
 
 
 def postprocess_text(preds, labels):
@@ -171,10 +272,34 @@ def compute_rouge_score(inference_data, preds):
     return result
 
 
-def run_inference(model_name, kw_strategy, kw_model_top_k, dataset, dataset_dir, output_dir, inference_on_split="test"):
+def run_inference(
+    model_name,
+    kw_strategy,
+    kw_model_top_k,
+    dataset,
+    dataset_dir,
+    output_dir,
+    inference_on_split="test",
+    tune_threshold=False,
+    dedup_strategy="fuzzy",
+    dedup_threshold=70,
+):
     dataset_dir = pathlib.Path(dataset_dir)
-    logits_threshold = estimate_logits_threshold(str(dataset_dir.joinpath("validation.jsonl")), 75)
-    logging.info(f"logits threshold is {logits_threshold}")
+    validation_file = str(dataset_dir.joinpath("validation.jsonl"))
+
+    if tune_threshold and kw_strategy == "sigext_topk":
+        best_pct, best_top_k = tune_hyperparameters(
+            validation_file,
+            deduplicate=True,
+            dedup_strategy=dedup_strategy,
+            dedup_threshold=dedup_threshold,
+        )
+        kw_model_top_k = best_top_k
+        logits_threshold = estimate_logits_threshold(validation_file, best_pct)
+        logging.info(f"Using tuned parameters: logits threshold is {logits_threshold} (percentile {best_pct}), top_k is {kw_model_top_k}")
+    else:
+        logits_threshold = estimate_logits_threshold(validation_file, 75)
+        logging.info(f"Using default parameters: logits threshold is {logits_threshold} (percentile 75), top_k is {kw_model_top_k}")
 
     if model_name == "mistral":
         predict_one_eg_fn = predict_one_eg_mistral
@@ -189,6 +314,8 @@ def run_inference(model_name, kw_strategy, kw_model_top_k, dataset, dataset_dir,
         kw_strategy,
         kw_model_top_k=kw_model_top_k,
         logits_threshold=logits_threshold,
+        dedup_strategy=dedup_strategy,
+        dedup_threshold=dedup_threshold,
     )
     assert not isinstance(prompting_fn, dict)
     dataset_dir = pathlib.Path(dataset_dir)
@@ -242,6 +369,9 @@ def main():
     parser.add_argument("--dataset_dir", required=True, type=str, help="directory of train and validation data.")
     parser.add_argument("--output_dir", required=True, type=str, help="directory to save experiment.")
     parser.add_argument("--inference_on_split", default="test", type=str, help="split_to_run_inference")
+    parser.add_argument("--tune_threshold", action="store_true", help="Tune threshold and top-k on validation set.")
+    parser.add_argument("--dedup_strategy", default="fuzzy", choices=["exact", "substring", "fuzzy"], help="Keyword deduplication strategy.")
+    parser.add_argument("--dedup_threshold", default=70, type=int, help="Similarity threshold for fuzzy deduplication.")
 
     args = parser.parse_args()
 
